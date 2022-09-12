@@ -13,7 +13,7 @@ Refer to the [documentation](https://overextended.github.io/docs/ox_inventory/) 
 When set, you can add the following to your 'server.cfg'
 
 ```
-exec @ox_inventory/config.cfg
+exec @ox_inventory/inventory.cfg
 ensure ox_inventory
 ```
 
