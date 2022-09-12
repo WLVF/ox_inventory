@@ -75,9 +75,9 @@ Citizen.CreateThreadNow(function()
 		end
 	end
 
-	result = MySQL.query.await(('SHOW COLUMNS FROM `%s`'):format(vehicleTable))
+	success, result = pcall(MySQL.query.await(('SHOW COLUMNS FROM `%s`'):format(vehicleTable)))
 
-	if result then
+	if success then
 		local glovebox, trunk
 
 		for i = 1, #result do
