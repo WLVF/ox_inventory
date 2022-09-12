@@ -5,6 +5,14 @@ lib.versionCheck('overextended/ox_inventory')
 local Inventory = server.inventory
 local Items = server.items
 
+local function getFrameworkIdentifier(player)
+    if shared.framework == "nd" then
+        return player.id
+    else
+        return player.identifier
+    end
+end
+
 ---@param player table
 ---@param data table?
 --- player requires source, identifier, and name
@@ -13,7 +21,7 @@ function server.setPlayerInventory(player, data)
 	while not shared.ready do Wait(0) end
 
 	if not data then
-		data = db.loadPlayer(player.identifier)
+		data = db.loadPlayer(getFrameworkIdentifier(player))
 	end
 
 	local inventory = {}
@@ -48,7 +56,7 @@ function server.setPlayerInventory(player, data)
 	end
 
 	player.source = tonumber(player.source)
-	local inv = Inventory.Create(player.source, player.name, 'player', shared.playerslots, totalWeight, shared.playerweight, player.identifier, inventory)
+	local inv = Inventory.Create(player.source, player.name, 'player', shared.playerslots, totalWeight, shared.playerweight, getFrameworkIdentifier(player), inventory)
 	inv.player = server.setPlayerData(player)
 	inv.player.ped = GetPlayerPed(player.source)
 
