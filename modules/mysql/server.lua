@@ -40,7 +40,7 @@ Citizen.CreateThreadNow(function()
 		Query[k] = v:gsub('{user_table}', playerTable):gsub('{user_column}', playerColumn):gsub('{vehicle_table}', vehicleTable):gsub('{vehicle_column}', vehicleColumn)
 	end
 
-	local success, result = pcall(MySQL.scalar.await, 'SELECT 1 FROM ox_inventory')
+	local success = pcall(MySQL.scalar.await, 'SELECT 1 FROM ox_inventory')
 
 	if not success then
 		MySQL.query([[CREATE TABLE `ox_inventory` (
@@ -51,7 +51,7 @@ Citizen.CreateThreadNow(function()
 			UNIQUE KEY `owner` (`owner`,`name`)
 		)]])
 	else
-		result = MySQL.query.await("SELECT owner, name FROM ox_inventory WHERE NOT owner = ''")
+		local result = MySQL.query.await("SELECT owner, name FROM ox_inventory WHERE NOT owner = ''")
 
 		if result and next(result) then
 			local parameters = {}
@@ -75,27 +75,30 @@ Citizen.CreateThreadNow(function()
 		end
 	end
 
-	success, result = pcall(MySQL.query.await(('SHOW COLUMNS FROM `%s`'):format(vehicleTable)))
+	local success = pcall(MySQL.scalar.await, 'SELECT 1 FROM vehicles')
 
 	if success then
-		local glovebox, trunk
+        local result = MySQL.query.await(('SHOW COLUMNS FROM `%s`'):format(vehicleTable))
+        if result then
+            local glovebox, trunk
 
-		for i = 1, #result do
-			local column = result[i]
-			if column.Field == 'glovebox' then
-				glovebox = true
-			elseif column.Field == 'trunk' then
-				trunk = true
-			end
-		end
+            for i = 1, #result do
+                local column = result[i]
+                if column.Field == 'glovebox' then
+                    glovebox = true
+                elseif column.Field == 'trunk' then
+                    trunk = true
+                end
+            end
 
-		if not glovebox then
-			MySQL.query(('ALTER TABLE `%s` ADD COLUMN `glovebox` LONGTEXT NULL'):format(vehicleTable))
-		end
+            if not glovebox then
+                MySQL.query(('ALTER TABLE `%s` ADD COLUMN `glovebox` LONGTEXT NULL'):format(vehicleTable))
+            end
 
-		if not trunk then
-			MySQL.query(('ALTER TABLE `%s` ADD COLUMN `trunk` LONGTEXT NULL'):format(vehicleTable))
-		end
+            if not trunk then
+                MySQL.query(('ALTER TABLE `%s` ADD COLUMN `trunk` LONGTEXT NULL'):format(vehicleTable))
+            end
+        end
     else
         MySQL.query([[
             CREATE TABLE IF NOT EXISTS `vehicles` (
@@ -127,7 +130,7 @@ Citizen.CreateThreadNow(function()
         ]])
 	end
 
-	success, result = pcall(MySQL.scalar.await, ('SELECT inventory FROM `%s`'):format(playerTable))
+	success = pcall(MySQL.scalar.await, ('SELECT inventory FROM `%s`'):format(playerTable))
 
 	if not success then
 		return MySQL.query(('ALTER TABLE `%s` ADD COLUMN `inventory` LONGTEXT NULL'):format(playerTable))
